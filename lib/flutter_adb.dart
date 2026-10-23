@@ -34,7 +34,9 @@ class Adb {
     String finalCommand = '$command;exit\n';
     AdbStream stream = await connection.openShell();
     await stream.writeString(finalCommand);
-    String output = await stream.onPayload.fold('', (previous, element) => previous + utf8.decode(element)).timeout(
+    String output = await stream.onPayload
+        .fold('', (previous, element) => previous + utf8.decode(element))
+        .timeout(
       const Duration(minutes: 1),
       onTimeout: () {
         print('Timeout closing the stream.');
@@ -45,7 +47,9 @@ class Adb {
     await connection.disconnect();
     // Sanitize output
     output = output.replaceAll('\r', '');
-    output.endsWith('\n') ? output = output.substring(0, output.length - 1) : output;
+    output.endsWith('\n')
+        ? output = output.substring(0, output.length - 1)
+        : output;
     return output.split(finalCommand).last.trim();
   }
 
@@ -66,14 +70,16 @@ class Adb {
       return false;
     }
     try {
-      String remoteTemp = '/data/local/tmp/app_install_${DateTime.now().millisecondsSinceEpoch}.apk';
+      String remoteTemp =
+          '/data/local/tmp/app_install_${DateTime.now().millisecondsSinceEpoch}.apk';
 
       AdbStream syncStream = await connection.open('sync:');
       AdbSync sync = AdbSync(syncStream);
       await sync.push(apkPath, remoteTemp);
       await sync.sendClose();
 
-      String result = await _runCommand(connection, 'pm install -r "$remoteTemp"');
+      String result =
+          await _runCommand(connection, 'pm install -r "$remoteTemp"');
       // Cleanup
       await _runCommand(connection, 'rm "$remoteTemp"');
 
@@ -140,11 +146,14 @@ class Adb {
     }
   }
 
-  static Future<String> _runCommand(AdbConnection connection, String command) async {
+  static Future<String> _runCommand(
+      AdbConnection connection, String command) async {
     String finalCommand = '$command;exit\n';
     AdbStream stream = await connection.openShell();
     await stream.writeString(finalCommand);
-    String output = await stream.onPayload.fold('', (previous, element) => previous + utf8.decode(element)).timeout(
+    String output = await stream.onPayload
+        .fold('', (previous, element) => previous + utf8.decode(element))
+        .timeout(
       const Duration(minutes: 5),
       onTimeout: () {
         stream.close();
@@ -154,7 +163,9 @@ class Adb {
 
     // Sanitize output
     output = output.replaceAll('\r', '');
-    output.endsWith('\n') ? output = output.substring(0, output.length - 1) : output;
+    output.endsWith('\n')
+        ? output = output.substring(0, output.length - 1)
+        : output;
 
     // Attempt to remove the echoed command from output
     // The exact behavior depends on the shell, but splitting by command is a common heuristic
